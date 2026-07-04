@@ -182,7 +182,7 @@ public static class TranslationManager
         foreach (var row in mapLocationHighlightRows)
         {
             var key = row.TranslationKey[0];
-            var value = InsertManualBreaks(row.TranslationTranslatedText, 50);
+            var value = InsertManualBreaks(row.TranslationTranslatedText, 54);
             MapLocationHightlightTranslations[key] = value;
         }
     }
