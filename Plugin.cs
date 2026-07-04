@@ -742,6 +742,11 @@ public static class Hooks
             TranslationManager.DemoHintTranslations,
             (hint, text) => hint.hintText = text
         );
+        TranslateByIndex(
+            ref __instance.finishedRandomHints,
+            TranslationManager.FinishedRandomHintTranslations,
+            (hint, text) => hint.hintText = text
+        );
     }
 
     [HarmonyPatch(typeof(MapHandle), nameof(MapHandle.UpdateLocationDescription))]

@@ -12,6 +12,7 @@ public static class TranslationManager
     public static Dictionary<string, string> TextTranslations = [];
     public static List<string> HintTranslations = [];
     public static List<string> DemoHintTranslations = [];
+    public static List<string> FinishedRandomHintTranslations = [];
     public static Dictionary<string, string> MapLocationHightlightTranslations = [];
     public static List<string> RuneNameTranslations = [];
     public static List<string> RuneDescriptionTranslations = [];
@@ -170,6 +171,10 @@ public static class TranslationManager
             else if (hintTranslationRow.TranslationKey[0].Equals("demohints"))
             {
                 DemoHintTranslations.Add(hintValue);
+            }
+            else if (hintTranslationRow.TranslationKey[0].Equals("finishedRandomHints"))
+            {
+                FinishedRandomHintTranslations.Add(hintValue);
             }
         }
     }
