@@ -866,6 +866,13 @@ public static class Hooks
             __instance.StoryText.text = translated;
             return;
         }
+        if (
+            TranslationManager.EndpointTranslations.TryGetValue(trimmed, out var translatedEndpoint)
+        )
+        {
+            __instance.StoryText.text = translatedEndpoint;
+            return;
+        }
         Plugin.Logger.LogWarning($"No translation found for story point text: {text}");
 
         // // Combined text from Setup() won't match individual CSV entries.

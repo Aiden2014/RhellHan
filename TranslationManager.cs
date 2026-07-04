@@ -28,6 +28,7 @@ public static class TranslationManager
     public static Dictionary<string, string> ChallengeMenuTranslations = [];
     public static Dictionary<string, string> SelectableSpellNameTranslations = [];
     public static Dictionary<string, string> SelectableSpellDescriptionTranslations = [];
+    public static Dictionary<string, string> EndpointTranslations = [];
 
     public static void Init()
     {
@@ -46,6 +47,7 @@ public static class TranslationManager
         InitCheat();
         InitChallengeMenu();
         InitSelectableSpells();
+        InitEndpoint();
     }
 
     private static void InitDialogue()
@@ -383,6 +385,14 @@ public static class TranslationManager
         }
     }
 
+    private static void InitEndpoint()
+    {
+        foreach (var row in ResourceLoader.GetTranslationRows("endpoint.csv", 2))
+        {
+            EndpointTranslations[row.TranslationOriginalText] = row.TranslationTranslatedText;
+        }
+    }
+
     private static string InsertManualBreaks(string text, int maxWidth)
     {
         StringBuilder sb = new();
@@ -403,7 +413,11 @@ public static class TranslationManager
                 continue;
             }
 
-            if (c == '<' && i + 1 < text.Length && (char.IsLetter(text[i + 1]) || text[i + 1] == '/'))
+            if (
+                c == '<'
+                && i + 1 < text.Length
+                && (char.IsLetter(text[i + 1]) || text[i + 1] == '/')
+            )
             {
                 inTag = true;
                 sb.Append(c);
