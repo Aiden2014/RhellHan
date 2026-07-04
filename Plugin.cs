@@ -792,8 +792,30 @@ public static class Hooks
             {
                 currnet.dialogueOptions[i].optionText = dialogueOptions[i];
             }
+            return;
         }
-        else
+
+        var translatedAnyOption = false;
+        for (int i = 0; i < currnet.dialogueOptions.Count; i++)
+        {
+            var optionText = currnet.dialogueOptions[i].optionText;
+            if (optionText.Any(c => isChineseChar(c)))
+            {
+                continue;
+            }
+            if (
+                TranslationManager.DialogueOptionTextTranslations.TryGetValue(
+                    optionText,
+                    out var translatedOptionText
+                )
+            )
+            {
+                currnet.dialogueOptions[i].optionText = translatedOptionText;
+                translatedAnyOption = true;
+            }
+        }
+
+        if (!translatedAnyOption)
         {
             Plugin.Logger.LogWarning(
                 $"No translation found for dialogue options key: {dialogueOptionsKey}"

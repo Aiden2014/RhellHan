@@ -18,6 +18,7 @@ public static class TranslationManager
     public static List<string> ItemNameTranslations = [];
     public static List<string> ItemDescriptionTranslations = [];
     public static Dictionary<string, List<string>> DialogueOptionTranslations = [];
+    public static Dictionary<string, string> DialogueOptionTextTranslations = [];
     public static Dictionary<string, string> TabDescriptionTranslations = [];
     public static Dictionary<string, string> RoomHintTranslations = [];
     public static Dictionary<string, string> StoryPointTranslations = [];
@@ -265,6 +266,8 @@ public static class TranslationManager
                     dialogueOptionTranslationRow.TranslationOriginalText,
                     dialogueOptionTranslationRow.TranslationTranslatedText,
                 ]);
+            DialogueOptionTextTranslations[dialogueOptionTranslationRow.TranslationOriginalText] =
+                dialogueOptionTranslationRow.TranslationTranslatedText;
         }
         foreach (var dialogueOptionBundle in dialogueOptionBundleMap)
         {
