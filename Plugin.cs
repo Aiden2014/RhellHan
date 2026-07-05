@@ -1224,6 +1224,84 @@ public static class Hooks
         }
     }
 
+    [HarmonyPatch(typeof(RanzomierMenu), nameof(RanzomierMenu.SetupVisuals))]
+    [HarmonyPostfix]
+    public static void RanzomierMenu_SetupVisuals_Postfix(RanzomierMenu __instance)
+    {
+        if (
+            TranslationManager.RanzomierMenuTranslations.TryGetValue(
+                __instance.Tdoor.text,
+                out var translatedTdoorText
+            )
+        )
+        {
+            __instance.Tdoor.text = translatedTdoorText;
+        }
+        if (
+            TranslationManager.RanzomierMenuTranslations.TryGetValue(
+                __instance.Tkeys.text,
+                out var translatedTkeysText
+            )
+        )
+        {
+            __instance.Tkeys.text = translatedTkeysText;
+        }
+        if (
+            TranslationManager.RanzomierMenuTranslations.TryGetValue(
+                __instance.Tdifficulty.text,
+                out var translatedTdifficultyText
+            )
+        )
+        {
+            __instance.Tdifficulty.text = translatedTdifficultyText;
+        }
+    }
+
+    [HarmonyPatch(typeof(RanzomierMenu), nameof(RanzomierMenu.SetRandomDifficulty))]
+    [HarmonyPostfix]
+    public static void RanzomierMenu_SetRandomDifficulty_Postfix(RanzomierMenu __instance)
+    {
+        if (
+            TranslationManager.RanzomierMenuTranslations.TryGetValue(
+                __instance.Tdifficulty.text,
+                out var translatedTdifficultyText
+            )
+        )
+        {
+            __instance.Tdifficulty.text = translatedTdifficultyText;
+        }
+    }
+
+    [HarmonyPatch(typeof(RanzomierMenu), nameof(RanzomierMenu.SetRandomKeys))]
+    [HarmonyPostfix]
+    public static void RanzomierMenu_SetRandomKeys_Postfix(RanzomierMenu __instance)
+    {
+        if (
+            TranslationManager.RanzomierMenuTranslations.TryGetValue(
+                __instance.Tkeys.text,
+                out var translatedTkeysText
+            )
+        )
+        {
+            __instance.Tkeys.text = translatedTkeysText;
+        }
+    }
+
+    [HarmonyPatch(typeof(RanzomierMenu), nameof(RanzomierMenu.SetRandomDoor))]
+    [HarmonyPostfix]
+    public static void RanzomierMenu_SetRandomDoor_Postfix(RanzomierMenu __instance)
+    {
+        if (
+            TranslationManager.RanzomierMenuTranslations.TryGetValue(
+                __instance.Tdoor.text,
+                out var translatedTdoorText
+            )
+        )
+        {
+            __instance.Tdoor.text = translatedTdoorText;
+        }
+    }
+
     private static bool isChineseChar(char c)
     {
         return c >= 0x4E00 && c <= 0x9FFF;

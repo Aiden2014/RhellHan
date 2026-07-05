@@ -34,6 +34,7 @@ public static class TranslationManager
     public static Dictionary<string, string> EndpointTranslations = [];
     public static Dictionary<string, string> DirectionKeyTranslations = [];
     public static Dictionary<string, string> TextMeshProUGUITranslations = [];
+    public static Dictionary<string, string> RanzomierMenuTranslations = [];
 
     public static void Init()
     {
@@ -56,6 +57,7 @@ public static class TranslationManager
         InitEndpoint();
         InitDirectionKey();
         InitTextMeshProUGUI();
+        InitRandomized();
     }
 
     private static void InitDirectionKey()
@@ -452,6 +454,33 @@ public static class TranslationManager
             var value = NormalizeNewlines(row.TranslationTranslatedText);
             TextMeshProUGUITranslations[key] = value;
         }
+    }
+
+    private static void InitRandomized()
+    {
+        // difficulty
+        RanzomierMenuTranslations["0 off"] = "0 关";
+        RanzomierMenuTranslations["1 very easy"] = "1 非常简单";
+        RanzomierMenuTranslations["2 very easy"] = "2 非常简单";
+        RanzomierMenuTranslations["3 easy"] = "3 简单";
+        RanzomierMenuTranslations["4 normal"] = "4 正常";
+        RanzomierMenuTranslations["5 normal"] = "5 正常";
+        RanzomierMenuTranslations["6 normal"] = "6 正常";
+        RanzomierMenuTranslations["7 hard"] = "7 困难";
+        RanzomierMenuTranslations["8 hard"] = "8 困难";
+        RanzomierMenuTranslations["9 very hard"] = "9 非常困难";
+        RanzomierMenuTranslations["10 evil"] = "10 噩梦";
+
+        // items
+        RanzomierMenuTranslations["off"] = "关";
+        RanzomierMenuTranslations["Unique Items are random"] = "独特物品随机";
+        RanzomierMenuTranslations["Keys are random"] = "钥匙随机";
+        RanzomierMenuTranslations["Shop currency is random"] = "商店货币随机";
+        RanzomierMenuTranslations["All Item uses are random"] = "所有物品和用途随机";
+
+        // areas
+        RanzomierMenuTranslations["main areas"] = "主区域";
+        RanzomierMenuTranslations["all areas"] = "所有区域";
     }
 
     private static string InsertManualBreaks(string text, int maxWidth)
