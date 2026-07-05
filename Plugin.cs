@@ -756,7 +756,10 @@ public static class Hooks
         {
             value = translated;
         }
-        if (string.IsNullOrEmpty(value) || !value.Any(c => isChineseChar(c)))
+        if (
+            string.IsNullOrEmpty(value)
+            || !value.Any(c => isChineseChar(c) || isUpDownLeftRightChar(c))
+        )
         {
             return;
         }
@@ -1195,6 +1198,11 @@ public static class Hooks
     private static bool isChineseChar(char c)
     {
         return c >= 0x4E00 && c <= 0x9FFF;
+    }
+
+    private static bool isUpDownLeftRightChar(char c)
+    {
+        return c == '↑' || c == '↓' || c == '←' || c == '→';
     }
 
     private static void TranslateByIndex<T>(
