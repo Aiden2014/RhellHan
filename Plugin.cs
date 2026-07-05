@@ -1120,6 +1120,28 @@ public static class Hooks
         }
     }
 
+    [HarmonyPatch(typeof(UIItemPickup), nameof(UIItemPickup.FillUiInfo))]
+    [HarmonyPrefix]
+    public static void UIItemPickup_FillUiInfo_Prefix(
+        string item,
+        string description,
+        Sprite visual,
+        Color itemColor,
+        int rarity,
+        UIItemPickup __instance
+    )
+    {
+        if (
+            __instance.ItemCollectText.Any(c => isChineseChar(c))
+            && __instance.RuneCollectText.Any(c => isChineseChar(c))
+        )
+        {
+            return;
+        }
+        __instance.ItemCollectText = "你获得了";
+        __instance.RuneCollectText = "你学会了";
+    }
+
     private static bool isChineseChar(char c)
     {
         return c >= 0x4E00 && c <= 0x9FFF;
