@@ -746,8 +746,15 @@ public static class Hooks
 
     [HarmonyPatch(typeof(Text), nameof(Text.text), MethodType.Setter)]
     [HarmonyPrefix]
-    public static void Text_set_text_Prefix(Text __instance, string value)
+    public static void Text_set_text_Prefix(Text __instance, ref string value)
     {
+        if (
+            "ActionBindingText".Equals(__instance.gameObject.name)
+            && TranslationManager.DirectionKeyTranslations.TryGetValue(value, out var translated)
+        )
+        {
+            value = translated;
+        }
         if (string.IsNullOrEmpty(value) || !value.Any(c => isChineseChar(c)))
         {
             return;

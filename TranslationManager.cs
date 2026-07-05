@@ -32,6 +32,7 @@ public static class TranslationManager
     public static Dictionary<string, string> SelectableSpellNameTranslations = [];
     public static Dictionary<string, string> SelectableSpellDescriptionTranslations = [];
     public static Dictionary<string, string> EndpointTranslations = [];
+    public static Dictionary<string, string> DirectionKeyTranslations = [];
 
     public static void Init()
     {
@@ -52,6 +53,21 @@ public static class TranslationManager
         InitChallengeMenu();
         InitSelectableSpells();
         InitEndpoint();
+        InitDirectionKey();
+    }
+
+    private static void InitDirectionKey()
+    {
+        // InputSystem 原始路径名
+        DirectionKeyTranslations["Up Arrow"] = "↑";
+        DirectionKeyTranslations["Down Arrow"] = "↓";
+        DirectionKeyTranslations["Left Arrow"] = "←";
+        DirectionKeyTranslations["Right Arrow"] = "→";
+        // 人类可读格式（InputSystem 可能在某些地方生成）
+        DirectionKeyTranslations["Up"] = "↑";
+        DirectionKeyTranslations["Down"] = "↓";
+        DirectionKeyTranslations["Left"] = "←";
+        DirectionKeyTranslations["Right"] = "→";
     }
 
     private static void InitDialogue()
