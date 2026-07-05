@@ -791,7 +791,7 @@ public static class Hooks
         }
         if ("Save Slot Text".Equals(__instance.gameObject.name))
         {
-            value = value.Replace("Slot", "存档");
+            value = value.Replace("Slot", "存档").Replace("Custom ", "自定义");
         }
         if (
             string.IsNullOrEmpty(value)
