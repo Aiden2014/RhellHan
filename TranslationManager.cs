@@ -101,6 +101,30 @@ public static class TranslationManager
                     dialogueTranslationRow.TranslationTranslatedText,
                 ]);
         }
+
+        // add space dialogue translations
+        var spaceDialogueTranslationsRows = ResourceLoader.GetTranslationRows(
+            "dialogue_space.csv",
+            4
+        );
+        foreach (var dialogueTranslationRow in spaceDialogueTranslationsRows)
+        {
+            var dialogueKey =
+                dialogueTranslationRow.TranslationKey[0]
+                + "|||"
+                + dialogueTranslationRow.TranslationKey[1];
+            if (!dialogueBundleMap.ContainsKey(dialogueKey))
+            {
+                dialogueBundleMap[dialogueKey] = new List<List<string>>();
+            }
+
+            dialogueBundleMap[dialogueKey]
+                .Add([
+                    dialogueTranslationRow.TranslationOriginalText,
+                    dialogueTranslationRow.TranslationTranslatedText,
+                ]);
+        }
+
         foreach (var dialogueBundle in dialogueBundleMap)
         {
             var dialogueKey = string.Join("|||", dialogueBundle.Value.Select(v => v[0]));
