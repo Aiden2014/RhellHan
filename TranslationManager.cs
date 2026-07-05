@@ -33,6 +33,7 @@ public static class TranslationManager
     public static Dictionary<string, string> SelectableSpellDescriptionTranslations = [];
     public static Dictionary<string, string> EndpointTranslations = [];
     public static Dictionary<string, string> DirectionKeyTranslations = [];
+    public static Dictionary<string, string> TextMeshProUGUITranslations = [];
 
     public static void Init()
     {
@@ -54,6 +55,7 @@ public static class TranslationManager
         InitSelectableSpells();
         InitEndpoint();
         InitDirectionKey();
+        InitTextMeshProUGUI();
     }
 
     private static void InitDirectionKey()
@@ -439,6 +441,16 @@ public static class TranslationManager
         foreach (var row in ResourceLoader.GetTranslationRows("endpoint.csv", 2))
         {
             EndpointTranslations[row.TranslationOriginalText] = row.TranslationTranslatedText;
+        }
+    }
+
+    private static void InitTextMeshProUGUI()
+    {
+        foreach (var row in ResourceLoader.GetTranslationRows("text_mesh_pro_ugui.csv", 1))
+        {
+            var key = NormalizeNewlines(row.TranslationOriginalText);
+            var value = NormalizeNewlines(row.TranslationTranslatedText);
+            TextMeshProUGUITranslations[key] = value;
         }
     }
 

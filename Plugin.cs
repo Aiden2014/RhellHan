@@ -756,6 +756,10 @@ public static class Hooks
         {
             value = translated;
         }
+        if ("Save Slot Text".Equals(__instance.gameObject.name))
+        {
+            value = value.Replace("Slot", "存档");
+        }
         if (
             string.IsNullOrEmpty(value)
             || !value.Any(c => isChineseChar(c) || isUpDownLeftRightChar(c))
@@ -1193,6 +1197,31 @@ public static class Hooks
         }
         __instance.ItemCollectText = "你获得了";
         __instance.RuneCollectText = "你学会了";
+    }
+
+    [HarmonyPatch(typeof(TextMeshProUGUI), "OnEnable")]
+    [HarmonyPrefix]
+    public static void TextMeshProUGUI_OnEnable_Prefix(TextMeshProUGUI __instance)
+    {
+        if (string.IsNullOrEmpty(__instance.text) || __instance.text.Any(c => isChineseChar(c)))
+        {
+            return;
+        }
+        if (
+            TranslationManager.TextMeshProUGUITranslations.TryGetValue(
+                __instance.text,
+                out var translatedText
+            )
+        )
+        {
+            __instance.text = translatedText;
+        }
+        else
+        {
+            Plugin.Logger.LogWarning(
+                $"TextMeshProUGUI.SetText: No translation found for text: {__instance.text}"
+            );
+        }
     }
 
     private static bool isChineseChar(char c)
