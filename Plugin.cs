@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -340,6 +341,38 @@ public static class Hooks
                     $"Translating segment {i}: '{segments[i].dialogue}' to '{translatedList[i]}'"
                 );
                 segments[i].dialogue = translatedList[i];
+            }
+        }
+        else if (
+            Regex.Match(
+                dialogueKey,
+                @"^seek out my siblings 5 celestial bodies who art enshrine improperly \|\|\|(\d+) remains$"
+            ) is
+            { Success: true } match
+        )
+        {
+            var lookupKey =
+                "seek out my siblings 5 celestial bodies who art enshrine improperly ||| remains";
+            if (
+                TranslationManager.DialogueTranslations.TryGetValue(
+                    lookupKey,
+                    out var remainsTranslatedList
+                )
+            )
+            {
+                var count = match.Groups[1].Value;
+                for (int i = 0; i < segments.Count && i < remainsTranslatedList.Count; i++)
+                {
+                    var translated = remainsTranslatedList[i];
+                    if (Regex.IsMatch(segments[i].dialogue, @"\d+ remains$"))
+                    {
+                        translated = count + remainsTranslatedList[i];
+                    }
+                    Plugin.Logger.LogInfo(
+                        $"Translating segment {i}: '{segments[i].dialogue}' to '{translated}'"
+                    );
+                    segments[i].dialogue = translated;
+                }
             }
         }
         else
