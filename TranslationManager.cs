@@ -95,6 +95,17 @@ public static class TranslationManager
                 dialogueBundleMap[dialogueKey] = new List<List<string>>();
             }
 
+            // update dialogue original text
+            if (
+                "eavensent being i stand watching from what must have been your calling land.".Equals(
+                    dialogueTranslationRow.TranslationOriginalText
+                )
+            )
+            {
+                dialogueTranslationRow.TranslationOriginalText =
+                    "heavensent being i stand watching from what must have been your calling land.";
+            }
+
             dialogueBundleMap[dialogueKey]
                 .Add([
                     dialogueTranslationRow.TranslationOriginalText,
