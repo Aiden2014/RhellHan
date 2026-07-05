@@ -10,6 +10,7 @@ public static class TranslationManager
     public static Dictionary<string, List<string>> DialogueTranslations = [];
     public static Dictionary<string, List<string>> SummaryTranslations = [];
     public static Dictionary<string, string> TextTranslations = [];
+    public static Dictionary<string, string> SettingTextTranslations = [];
     public static List<string> HintTranslations = [];
     public static List<string> DemoHintTranslations = [];
     public static List<string> FinishedRandomHintTranslations = [];
@@ -37,6 +38,7 @@ public static class TranslationManager
         InitDialogue();
         InitSummary();
         InitText();
+        InitSettingText();
         InitHint();
         InitMapLocationHighlight();
         InitPlayerInventory();
@@ -145,6 +147,25 @@ public static class TranslationManager
         }
         // Add hardcoded translations for text that is not in the CSV file
         TextTranslations["quit challenge"] = "退出挑战";
+    }
+
+    private static void InitSettingText()
+    {
+        SettingTextTranslations["on"] = "开";
+        SettingTextTranslations["off"] = "关";
+        SettingTextTranslations["type1"] = "类型1";
+        SettingTextTranslations["type2"] = "类型2";
+        SettingTextTranslations["mild"] = "弱";
+        SettingTextTranslations["strong"] = "强";
+        SettingTextTranslations["normal"] = "正常";
+        SettingTextTranslations["light"] = "明显";
+        SettingTextTranslations["disabled"] = "禁用";
+        SettingTextTranslations["enabled"] = "启用";
+        SettingTextTranslations["Deuteranopia"] = "绿色盲";
+        SettingTextTranslations["Protanopia"] = "红色盲";
+        SettingTextTranslations["Tritanopia"] = "蓝色盲";
+        SettingTextTranslations["Monochromatism"] = "单色盲";
+        SettingTextTranslations["fast"] = "快速";
     }
 
     private static void InitHint()

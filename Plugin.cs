@@ -702,6 +702,48 @@ public static class Hooks
         }
     }
 
+    [HarmonyPatch(typeof(UiOptionButton), nameof(UiOptionButton.UpdateVisuals))]
+    [HarmonyPostfix]
+    public static void UiOptionButton_UpdateVisuals_Postfix(UiOptionButton __instance)
+    {
+        if (
+            string.IsNullOrEmpty(__instance.settingstext.text)
+            || __instance.settingstext.text.Any(c => isChineseChar(c))
+        )
+        {
+            return;
+        }
+        var normalizedText = TranslationManager.NormalizeNewlines(__instance.settingstext.text);
+        if (
+            TranslationManager.SettingTextTranslations.TryGetValue(
+                normalizedText,
+                out var translatedText
+            )
+        )
+        {
+            var chineseFont = ResourceLoader.LoadChineseFontAsUITextFont(
+                "chinese_font.bundle",
+                "Ui_Font_02_KNMaiyuan"
+            // "mao_ken.bundle",
+            // "MaoKen0"
+            );
+            __instance.settingstext.font = chineseFont;
+            __instance.settingstext.text = translatedText;
+            if (!__instance.settingstext.font.ToString().Equals("Ui_Font_02 (UnityEngine.Font))"))
+            {
+                Plugin.Logger.LogWarning(
+                    $"{__instance.settingstext.font}) is not Ui_Font_02, value: {__instance.settingstext.text}, translated: {translatedText}"
+                );
+            }
+        }
+        else
+        {
+            Plugin.Logger.LogWarning(
+                $"No translation found for setting text: {__instance.settingstext.text}"
+            );
+        }
+    }
+
     [HarmonyPatch(typeof(Text), nameof(Text.text), MethodType.Setter)]
     [HarmonyPrefix]
     public static void Text_set_text_Prefix(Text __instance, string value)
