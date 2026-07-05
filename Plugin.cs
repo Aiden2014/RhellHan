@@ -668,6 +668,7 @@ public static class Hooks
             if (
                 string.IsNullOrEmpty(textComponent.text)
                 || textComponent.text.Any(c => isChineseChar(c))
+                || textComponent.gameObject.name.Equals("ActionBindingText")
             )
             {
                 return;
