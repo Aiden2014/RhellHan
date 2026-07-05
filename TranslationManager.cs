@@ -136,16 +136,79 @@ public static class TranslationManager
                 ]);
         }
 
+        // Build base DialogueTranslations entries
         foreach (var dialogueBundle in dialogueBundleMap)
         {
             var dialogueKey = string.Join("|||", dialogueBundle.Value.Select(v => v[0]));
-            var dialogueValue = new List<string>();
-
-            foreach (var translationList in dialogueBundle.Value)
-            {
-                dialogueValue.Add(translationList[1]);
-            }
+            var dialogueValue = dialogueBundle.Value.Select(v => v[1]).ToList();
             DialogueTranslations[dialogueKey] = dialogueValue;
+        }
+
+        // Apply dialogue changers: for each bundle, generate all combinations of
+        // original + changed segments and add them to DialogueTranslations
+        var dialogueChangerTranslationsRows = ResourceLoader.GetTranslationRows(
+            "dialogue_changer.csv",
+            4
+        );
+        // changerMap: level|||pathID -> (changeLine -> list of (newEnglish, newChinese))
+        var changerMap = new Dictionary<string, Dictionary<int, List<(string, string)>>>();
+        foreach (var row in dialogueChangerTranslationsRows)
+        {
+            var bundleKey = row.TranslationKey[0] + "|||" + row.TranslationKey[1];
+            var changeLine = int.Parse(row.TranslationKey[2]);
+            var newEnglish = row.TranslationOriginalText;
+            var newChinese = row.TranslationTranslatedText;
+
+            if (!changerMap.ContainsKey(bundleKey))
+                changerMap[bundleKey] = new Dictionary<int, List<(string, string)>>();
+            if (!changerMap[bundleKey].ContainsKey(changeLine))
+                changerMap[bundleKey][changeLine] = new List<(string, string)>();
+            changerMap[bundleKey][changeLine].Add((newEnglish, newChinese));
+        }
+
+        foreach (var dialogueBundle in dialogueBundleMap)
+        {
+            if (!changerMap.TryGetValue(dialogueBundle.Key, out var bundleChangers))
+                continue;
+
+            var baseTexts = dialogueBundle.Value.Select(v => v[0]).ToList();
+            var baseTranslations = dialogueBundle.Value.Select(v => v[1]).ToList();
+
+            // Build options per index: first option is always the original,
+            // followed by any changer-provided alternatives
+            var optionsPerIndex = new List<(string english, string chinese)>[baseTexts.Count];
+            for (int i = 0; i < baseTexts.Count; i++)
+            {
+                optionsPerIndex[i] = [(baseTexts[i], baseTranslations[i])];
+                if (bundleChangers.TryGetValue(i, out var changers))
+                    optionsPerIndex[i].AddRange(changers);
+            }
+
+            // Generate all combinations via iterative Cartesian product.
+            // combinations[0] is the base case (all originals) — skip it since
+            // the base entry is already in DialogueTranslations.
+            var combinations = new List<List<(string english, string chinese)>> { new() };
+            for (int i = 0; i < optionsPerIndex.Length; i++)
+            {
+                var expanded = new List<List<(string english, string chinese)>>();
+                foreach (var combo in combinations)
+                {
+                    foreach (var opt in optionsPerIndex[i])
+                    {
+                        var newCombo = new List<(string, string)>(combo) { opt };
+                        expanded.Add(newCombo);
+                    }
+                }
+                combinations = expanded;
+            }
+
+            for (int c = 1; c < combinations.Count; c++)
+            {
+                var combo = combinations[c];
+                var key = string.Join("|||", combo.Select(x => x.english));
+                var value = combo.Select(x => x.chinese).ToList();
+                DialogueTranslations[key] = value;
+            }
         }
     }
 
