@@ -163,6 +163,7 @@ public static class TranslationManager
         }
         // Add hardcoded translations for text that is not in the CSV file
         TextTranslations["quit challenge"] = "退出挑战";
+        TextTranslations["back"] = "返回";
     }
 
     private static void InitSettingText()
