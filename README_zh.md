@@ -32,8 +32,7 @@ RhellHan 为游戏《Rhell》提供完整的简体中文本地化支持。游戏
 
 - **[BepInEx 5.x](https://github.com/BepInEx/BepInEx)** — Unity 游戏模组框架，提供插件加载和日志系统。
 - **[HarmonyLib 2.x](https://github.com/pardeike/Harmony)** — 运行时方法补丁库，实现无侵入式代码注入。
-- **[Unity Editor 2020.3.49f1c1](https://unity.com/)** — 用于通过 `fnt2TMPro` 从 `.fnt` 位图字体生成中文 `TMP_FontAsset`、配置 SDF 设置并将字体打包为 AssetBundle。该游戏与《Seafrog》使用相同的 Unity 2020 版本。
-- **[fnt2TMPro](https://github.com/napbla/fnt2TMPro)** — 将 `.fnt` 位图字体配置转换为 Unity TextMeshPro 字体资产。
+- **[Unity Editor 2020.3.49f1c1](https://unity.com/)** — 通过 TextMeshPro 的 Font Asset Creator，从 `KNMaiyuan-Regular` 生成中文 `TMP_FontAsset`，并将字体打包为 AssetBundle。
 - **[UABEANext](https://github.com/nesrak1/UABEANext)** — Unity Asset Bundle Extractor，用于从游戏的资产包中提取 MonoBehaviour 文本数据，为构建翻译源 CSV 文件提供原始字符串。
 - **[DnSpy-MCPserver-Extension](https://github.com/AgentSmithers/DnSpy-MCPserver-Extension)** — dnSpyEx 的 MCP 服务器扩展，支持程序化 IL 检查和补丁。开发过程中用于探索游戏程序集方法、识别注入点并验证 Harmony 补丁目标。
 - **[ParaTranz](https://paratranz.cn/)** — 协作翻译管理平台，用于众包本地化。
@@ -42,11 +41,11 @@ RhellHan 为游戏《Rhell》提供完整的简体中文本地化支持。游戏
 
 由于《Rhell》仅提供拉丁字符的 TMP 字体，我们需要生成中文回退字体：
 
-1. **提取所需字符** — 运行 `scripts/extract_unique_chinese_chars.py`，从翻译 CSV 文件中收集所有唯一的中文字符。
-2. **生成位图字体** — 使用 [Snowb](https://snowb.org/) 将字符集渲染为 `.fnt` 位图字体，并调整合适的尺寸和间距。
-3. **转换为 TMP 格式** — 在 Unity Editor 2020.3.49f1c1 中，使用 `fnt2TMPro` 将 `.fnt` 输出转换为 `TMP_FontAsset`。将字体图集纹理配置为 `RGBA 32 bit`、`Full Rect`、`Point` 过滤、无压缩，并将 shader 设置为 `TextMeshPro/Sprite`。
-4. **打包为 AssetBundle** — 使用 Unity 的 Asset Bundle Browser 打包字体资产。同时包含 TMP 字体（用于 TextMeshPro 回退）和旧版 `Font` 变体（用于 `UnityEngine.UI.Text` 组件）。
-5. **运行时加载** — 将 `.bundle` 文件放入 `BepInEx/plugins/resources/`。插件通过 `AssetBundle.LoadFromFile()` 加载。
+1. **提取所需字符** — 运行 `scripts/extract_unique_non_ascii_chars.py`，从已翻译的 CSV 文件中收集所有唯一的非 ASCII 字符。默认输出为 `resources/unique_non_ascii_chars.txt`。
+2. **创建 TMP 字体资产** — 在 Unity Editor 2020.3.49f1c1 中导入 `KNMaiyuan-Regular` 字体和生成的 `unique_non_ascii_chars.txt`，然后打开 TextMeshPro 的 Font Asset Creator。
+3. **使用字体生成配置** — Source Font File 选择 `KNMaiyuan-Regular`，Sampling Point Size 设为 `Auto Sizing`，Padding 设为 `5`，Packing Method 设为 `Fast`，Atlas Resolution 设为 `2048 x 2048`，Character Set 设为 `Characters from File`，Character File 选择 `unique_non_ascii_chars`，Render Mode 设为 `SDFAA`，并勾选 `Get Kerning Pairs`。生成并保存 TMP 字体资产为 `KNMaiyuan-Regular SDF`。
+4. **打包为 AssetBundle** — 使用 Unity 的 AssetBundle 工具，将 TMP 字体资产和 `KNMaiyuan-Regular` 字体一起打包为 `chinese_font.bundle`。
+5. **安装 bundle** — 将 `chinese_font.bundle` 放入 `Rhell\BepInEx\plugins\resources`（或你实际安装目录下的 `BepInEx/plugins/resources/`）。插件会通过 `AssetBundle.LoadFromFile()` 加载。
 
 ## 项目结构
 
@@ -80,7 +79,7 @@ RhellHan/
 │   ├── text_mesh_pro.csv                # TextMeshPro 文本翻译
 │   ├── text_mesh_pro_ugui.csv           # TextMeshPro UGUI 文本翻译
 │   ├── world_name.csv                   # 世界/区域名称翻译
-│   └── unique_chinese_chars.txt         # 用于字体生成的字符列表
+│   └── unique_non_ascii_chars.txt       # 用于字体生成的字符列表
 ├── scripts/                             # Python 自动化工具
 │   ├── compare_hints_arrays.py          # 跨版本对比提示数组
 │   ├── compare_json_files.py            # 对比 JSON 导出用于翻译 QA
@@ -101,7 +100,7 @@ RhellHan/
 │   ├── extract_texts_from_monobehaviour.py
 │   ├── extract_ui_item_tab_descriptions.py
 │   ├── extract_ui_selectable_spell_level3_to_csv.py
-│   ├── extract_unique_chinese_chars.py  # 收集中文字符用于字体生成
+│   ├── extract_unique_non_ascii_chars.py # 收集非 ASCII 字符用于字体生成
 │   ├── extract_world_names.py
 │   └── filter_and_deduplicate_dialogues.py
 ├── FontManager.cs                       # TMP_FontAsset 加载时的回退字体注册

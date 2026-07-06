@@ -32,8 +32,7 @@ Core components:
 
 - **[BepInEx 5.x](https://github.com/BepInEx/BepInEx)** — Unity game modding framework providing plugin loading and logging.
 - **[HarmonyLib 2.x](https://github.com/pardeike/Harmony)** — Runtime method patching library for non-invasive code injection.
-- **[Unity Editor 2020.3.49f1c1](https://unity.com/)** — Used to generate the Chinese TMP_FontAsset from `.fnt` bitmap fonts via `fnt2TMPro`, configure SDF settings, and package fonts into AssetBundles. The game uses the same Unity 2020 version as Seafrog.
-- **[fnt2TMPro](https://github.com/napbla/fnt2TMPro)** — Converts `.fnt` bitmap font configurations into Unity TextMeshPro font assets.
+- **[Unity Editor 2020.3.49f1c1](https://unity.com/)** — Used with TextMeshPro's Font Asset Creator to generate the Chinese TMP_FontAsset from `KNMaiyuan-Regular` and package it into an AssetBundle.
 - **[UABEANext](https://github.com/nesrak1/UABEANext)** — Unity Asset Bundle Extractor, used to extract MonoBehaviour text data from the game's asset bundles for building translation source CSVs.
 - **[DnSpy-MCPserver-Extension](https://github.com/AgentSmithers/DnSpy-MCPserver-Extension)** — dnSpyEx MCP server enabling programmatic IL inspection and patching. Used during development to explore game assembly methods, identify injection points, and verify Harmony patch targets.
 - **[ParaTranz](https://paratranz.cn/)** — Collaborative translation management platform for crowdsourced localization.
@@ -42,11 +41,11 @@ Core components:
 
 Since *Rhell* only ships Latin-character TMP fonts, we need to generate a Chinese fallback:
 
-1. **Extract required characters** — Run `scripts/extract_unique_chinese_chars.py` to collect all unique Chinese characters from translation CSV files.
-2. **Generate bitmap font** — Use [Snowb](https://snowb.org/) to render the character set into a `.fnt` bitmap font with appropriate sizing and padding.
-3. **Convert to TMP format** — In Unity Editor 2020.3.49f1c1, use `fnt2TMPro` to convert the `.fnt` output into a `TMP_FontAsset`. Configure the font atlas texture as `RGBA 32 bit`, `Full Rect`, `Point` filter, no compression, and set the shader to `TextMeshPro/Sprite`.
-4. **Package into AssetBundle** — Use Unity's Asset Bundle Browser to bundle the font asset. Include both the TMP font (for TextMeshPro fallback) and a legacy `Font` variant (for `UnityEngine.UI.Text` components).
-5. **Load at runtime** — Place the `.bundle` file in `BepInEx/plugins/resources/`. The plugin loads it via `AssetBundle.LoadFromFile()`.
+1. **Extract required characters** — Run `scripts/extract_unique_non_ascii_chars.py` to collect all unique non-ASCII characters from the translated CSV files. By default it writes `resources/unique_non_ascii_chars.txt`.
+2. **Create the TMP font asset** — In Unity Editor 2020.3.49f1c1, import the `KNMaiyuan-Regular` font and the generated `unique_non_ascii_chars.txt`, then open TextMeshPro's Font Asset Creator.
+3. **Use the font creator settings** — Set the source font to `KNMaiyuan-Regular`, Sampling Point Size to `Auto Sizing`, Padding to `5`, Packing Method to `Fast`, Atlas Resolution to `2048 x 2048`, Character Set to `Characters from File`, Character File to `unique_non_ascii_chars`, Render Mode to `SDFAA`, and enable `Get Kerning Pairs`. Generate and save the TMP font asset as `KNMaiyuan-Regular SDF`.
+4. **Package into AssetBundle** — Use Unity's Asset Bundle tooling to package the TMP font asset and the `KNMaiyuan-Regular` font into `chinese_font.bundle`.
+5. **Install the bundle** — Place `chinese_font.bundle` in `Rhell\BepInEx\plugins\resources` (or the equivalent `BepInEx/plugins/resources/` folder for your game install). The plugin loads it via `AssetBundle.LoadFromFile()`.
 
 ## Project Structure
 
@@ -80,7 +79,7 @@ RhellHan/
 │   ├── text_mesh_pro.csv                # TextMeshPro text translations
 │   ├── text_mesh_pro_ugui.csv           # TextMeshPro UGUI text translations
 │   ├── world_name.csv                   # World/area name translations
-│   └── unique_chinese_chars.txt         # Extracted character list for font generation
+│   └── unique_non_ascii_chars.txt       # Extracted character list for font generation
 ├── scripts/                             # Python automation tools
 │   ├── compare_hints_arrays.py          # Diff hint arrays across versions
 │   ├── compare_json_files.py            # Diff JSON exports for translation QA
@@ -101,7 +100,7 @@ RhellHan/
 │   ├── extract_texts_from_monobehaviour.py
 │   ├── extract_ui_item_tab_descriptions.py
 │   ├── extract_ui_selectable_spell_level3_to_csv.py
-│   ├── extract_unique_chinese_chars.py  # Collect Chinese chars for font generation
+│   ├── extract_unique_non_ascii_chars.py # Collect non-ASCII chars for font generation
 │   ├── extract_world_names.py
 │   └── filter_and_deduplicate_dialogues.py
 ├── FontManager.cs                       # Fallback font registration on TMP_FontAsset load
