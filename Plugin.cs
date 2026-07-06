@@ -646,7 +646,7 @@ public static class Hooks
         }
         var chineseFallbackFont = ResourceLoader.LoadChineseFont(
             "chinese_font.bundle",
-            "KNMaiyuan SDF"
+            "KNMaiyuan-Regular SDF"
         // "mao_ken.bundle",
         // "MaoKen0"
         );
@@ -736,7 +736,7 @@ public static class Hooks
             {
                 var chineseFont = ResourceLoader.LoadChineseFontAsUITextFont(
                     "chinese_font.bundle",
-                    "Ui_Font_02_KNMaiyuan"
+                    "KNMaiyuan-Regular"
                 // "mao_ken.bundle",
                 // "MaoKen0"
                 );
@@ -777,7 +777,7 @@ public static class Hooks
         {
             var chineseFont = ResourceLoader.LoadChineseFontAsUITextFont(
                 "chinese_font.bundle",
-                "Ui_Font_02_KNMaiyuan"
+                "KNMaiyuan-Regular"
             // "mao_ken.bundle",
             // "MaoKen0"
             );
@@ -820,14 +820,14 @@ public static class Hooks
         {
             return;
         }
-        if (!__instance.font.name.Equals("Ui_Font_02_KNMaiyuan"))
+        if (!__instance.font.name.Equals("KNMaiyuan-Regular"))
         {
             Plugin.Logger.LogInfo(
                 $"Text_set_text_Prefix: font is {__instance.font.name}, value: {value}"
             );
             __instance.font = ResourceLoader.LoadChineseFontAsUITextFont(
                 "chinese_font.bundle",
-                "Ui_Font_02_KNMaiyuan"
+                "KNMaiyuan-Regular"
             // "mao_ken.bundle",
             // "MaoKen0"
             );
