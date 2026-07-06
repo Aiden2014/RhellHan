@@ -265,8 +265,6 @@ public static class TranslationManager
             var textValue = NormalizeNewlines(textTranslationRow.TranslationTranslatedText);
             TextTranslations[textKey] = textValue;
         }
-        // Add hardcoded translations for text that is not in the CSV file
-        TextTranslations["quit challenge"] = "退出挑战";
     }
 
     private static void InitSettingText()

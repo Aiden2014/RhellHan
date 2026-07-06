@@ -1355,6 +1355,16 @@ public static class Hooks
         }
     }
 
+    [HarmonyPatch(typeof(PauseMenu), nameof(PauseMenu.OpenMenu))]
+    [HarmonyPostfix]
+    public static void PauseMenu_OpenMenu_Postfix(PauseMenu __instance)
+    {
+        if ("quit challenge".Equals(__instance.saveAndQuitText.text))
+        {
+            __instance.saveAndQuitText.text = "退出挑战";
+        }
+    }
+
     private static bool isChineseChar(char c)
     {
         return c >= 0x4E00 && c <= 0x9FFF;
