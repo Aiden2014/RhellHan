@@ -5,6 +5,10 @@ namespace RhellHan;
 
 public static class FontManager
 {
+    public const float ChineseNormalFaceDilate = 0f;
+    public const float ChineseBoldFaceDilate = 0.35f;
+    public const float ChineseBoldSpacing = 8f;
+
     private static bool _chineseFontConfigured;
 
     public static bool HasFallback(TMP_FontAsset font, string fallbackName)
@@ -49,17 +53,22 @@ public static class FontManager
         if (!_chineseFontConfigured)
         {
             _chineseFontConfigured = true;
-            chineseFallbackFont.normalStyle = -0.15f;
-            chineseFallbackFont.boldStyle = 0.35f;
-            chineseFallbackFont.boldSpacing = 7f;
+            chineseFallbackFont.normalStyle = ChineseNormalFaceDilate;
+            chineseFallbackFont.boldStyle = ChineseBoldFaceDilate;
+            chineseFallbackFont.boldSpacing = ChineseBoldSpacing;
             if (
                 chineseFallbackFont?.material != null
                 && chineseFallbackFont.material.HasProperty(ShaderUtilities.ID_FaceDilate)
             )
             {
-                chineseFallbackFont.material.SetFloat(ShaderUtilities.ID_FaceDilate, -0.15f);
+                chineseFallbackFont.material.SetFloat(
+                    ShaderUtilities.ID_FaceDilate,
+                    ChineseNormalFaceDilate
+                );
                 Plugin.Logger.LogInfo(
-                    $"Configured Chinese font '{chineseFallbackFont.name}' normalStyle=-0.15, boldStyle=0.35"
+                    $"Configured Chinese font '{chineseFallbackFont.name}' "
+                        + $"normalStyle={ChineseNormalFaceDilate}, "
+                        + $"boldStyle={ChineseBoldFaceDilate}"
                 );
             }
         }

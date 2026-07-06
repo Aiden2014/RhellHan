@@ -71,6 +71,8 @@ public class FallbackFontThicknessFixer : MonoBehaviour
         if (_tmpText == null)
             return;
 
+        DisableDefaultDialogueBold(_tmpText);
+
         _frameCounter++;
         if (_frameCounter % 120 == 0)
         {
@@ -89,9 +91,12 @@ public class FallbackFontThicknessFixer : MonoBehaviour
         )
         {
             var current = _tmpText.fontMaterial.GetFloat(ShaderUtilities.ID_FaceDilate);
-            if (current != -0.15f)
+            if (current != FontManager.ChineseNormalFaceDilate)
             {
-                _tmpText.fontMaterial.SetFloat(ShaderUtilities.ID_FaceDilate, -0.15f);
+                _tmpText.fontMaterial.SetFloat(
+                    ShaderUtilities.ID_FaceDilate,
+                    FontManager.ChineseNormalFaceDilate
+                );
             }
         }
 
@@ -186,6 +191,17 @@ public class FallbackFontThicknessFixer : MonoBehaviour
                 return true;
         }
         return false;
+    }
+
+    public static void DisableDefaultDialogueBold(TMP_Text tmpText)
+    {
+        if (tmpText == null)
+            return;
+
+        if ((tmpText.fontStyle & FontStyles.Bold) == FontStyles.Bold)
+        {
+            tmpText.fontStyle &= ~FontStyles.Bold;
+        }
     }
 
     private static bool IsDialogueControlMarkerChar(string text, int index)
@@ -325,6 +341,7 @@ public static class Hooks
         var alreadyTranslated = segments[0].dialogue.Any(c => isChineseChar(c));
         if (alreadyTranslated)
         {
+            EnsureDialogueFixer(__instance, segments);
             UpdateFixerState(__instance, segments);
             return;
         }
@@ -399,14 +416,7 @@ public static class Hooks
 
         // 检查是否有中文字符，如果有则挂载修复组件
         var hasChinese = segments.Any(s => s.dialogue.Any(c => isChineseChar(c)));
-        var fixer = __instance.dialogueBox.gameObject.GetComponent<FallbackFontThicknessFixer>();
-        if (hasChinese && fixer == null)
-        {
-            fixer = __instance.dialogueBox.gameObject.AddComponent<FallbackFontThicknessFixer>();
-            Plugin.Logger.LogInfo(
-                "[FeedDialouge] Created FallbackFontThicknessFixer on dialogueBox"
-            );
-        }
+        var fixer = hasChinese ? EnsureDialogueFixer(__instance, segments) : null;
 
         // wobble: 原版 FixedUpdate 中的 wobble 直接操作 dialogueBox.mesh.vertices，
         // 但 fallback 中文字符在 TMP_SubMeshUI 子网格中，vertexIndex 指向子网格
@@ -415,7 +425,6 @@ public static class Hooks
         visualState.WobbleSections.Clear();
         visualState.BoldRangesBySection.Clear();
         bool shouldWobble = false;
-        bool hasBold = false;
         for (int i = 0; i < segments.Count; i++)
         {
             if (segments[i].wobbleText && segments[i].dialogue.Any(c => isChineseChar(c)))
@@ -425,28 +434,37 @@ public static class Hooks
                 shouldWobble = true;
                 Plugin.Logger.LogInfo($"Wobble: delegated to Fixer for segment {i}");
             }
-
-            if (StripBoldTags(segments[i].dialogue, out var stripped, out var boldRanges))
-            {
-                segments[i].dialogue = stripped;
-                visualState.BoldRangesBySection[i] = boldRanges;
-                hasBold = true;
-                Plugin.Logger.LogInfo(
-                    $"Bold: {boldRanges.Count} range(s) detected in segment {i}: "
-                        + $"'{stripped.Substring(0, Math.Min(stripped.Length, 50))}...'"
-                );
-            }
         }
         if (fixer != null)
         {
             fixer.ShouldWobble = shouldWobble;
-            fixer.SetBoldRanges(
-                hasBold ? visualState.BoldRangesBySection.Values.SelectMany(r => r) : null
-            );
+            fixer.SetBoldRanges(null);
             Plugin.Logger.LogInfo(
-                $"[FeedDialouge] fixer state: ShouldWobble={shouldWobble}, HasBoldText={hasBold}"
+                $"[FeedDialouge] fixer state: ShouldWobble={shouldWobble}, HasBoldText=false"
             );
         }
+    }
+
+    private static FallbackFontThicknessFixer EnsureDialogueFixer(
+        DialogueUI dialogueUi,
+        List<DialogueSegment> segments
+    )
+    {
+        if (dialogueUi?.dialogueBox == null)
+            return null;
+
+        FallbackFontThicknessFixer.DisableDefaultDialogueBold(dialogueUi.dialogueBox);
+
+        var fixer = dialogueUi.dialogueBox.gameObject.GetComponent<FallbackFontThicknessFixer>();
+        if (fixer == null && segments.Any(s => s.dialogue.Any(c => isChineseChar(c))))
+        {
+            fixer = dialogueUi.dialogueBox.gameObject.AddComponent<FallbackFontThicknessFixer>();
+            Plugin.Logger.LogInfo(
+                "[FeedDialouge] Created FallbackFontThicknessFixer on dialogueBox"
+            );
+        }
+
+        return fixer;
     }
 
     private static void UpdateFixerState(DialogueUI __instance, List<DialogueSegment> segments)
@@ -471,6 +489,8 @@ public static class Hooks
     [HarmonyPostfix]
     public static void DialogueUI_SetDialogueSection_Postfix(DialogueUI __instance, int dex)
     {
+        FallbackFontThicknessFixer.DisableDefaultDialogueBold(__instance.dialogueBox);
+
         var fixer = __instance.dialogueBox.gameObject.GetComponent<FallbackFontThicknessFixer>();
         if (fixer == null)
             return;
