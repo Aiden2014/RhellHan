@@ -17,6 +17,7 @@
 - Write exactly three columns with an empty translation field and no header.
 - Resolve new input and output paths from the repository, not the process working directory.
 - Leave `STEAM_BUILD_ID = ""` for the maintainer to fill in.
+- Execute Python scripts and test commands with the Windows launcher form `py ...`.
 - Do not modify `resources/dialogue.csv` or the previous translated CSV.
 - Use Conventional Commit messages in `type(scope): subject` form.
 
@@ -37,9 +38,20 @@
 Create `tests/test_extract_updated_dialogues.py` with literal expectations that independently cover old-text exclusion, corrected-text selection, first-occurrence deduplication, and exact whitespace comparison:
 
 ```python
+import importlib
 import unittest
 
-from scripts.extract_updated_dialogues import select_updated_dialogues
+
+def require_feature(name):
+    try:
+        module = importlib.import_module("scripts.extract_updated_dialogues")
+        return getattr(module, name)
+    except (ModuleNotFoundError, AttributeError) as error:
+        raise AssertionError(f"缺少待实现功能: {name}") from error
+
+
+def select_updated_dialogues(*args):
+    return require_feature("select_updated_dialogues")(*args)
 
 
 class SelectUpdatedDialoguesTests(unittest.TestCase):
@@ -97,10 +109,10 @@ if __name__ == "__main__":
 Run:
 
 ```powershell
-python -m unittest discover -s tests -p "test_extract_updated_dialogues.py" -v
+py -m unittest discover -s tests -p "test_extract_updated_dialogues.py" -v
 ```
 
-Expected: import failure because `scripts.extract_updated_dialogues` does not exist.
+Expected: four assertion failures containing `缺少待实现功能: select_updated_dialogues` because the production module does not exist. The RED run must contain failures, not import errors.
 
 - [ ] **Step 3: Implement the minimal pure selection function**
 
@@ -165,11 +177,8 @@ import csv
 import tempfile
 from pathlib import Path
 
-from scripts.extract_updated_dialogues import (
-    DialogueCsvError,
-    extract_updated_dialogues,
-    select_updated_dialogues,
-)
+def extract_updated_dialogues(*args):
+    return require_feature("extract_updated_dialogues")(*args)
 
 
 class CsvExtractionTests(unittest.TestCase):
@@ -212,7 +221,8 @@ class CsvExtractionTests(unittest.TestCase):
             self.write_csv(new_path, [["only one column"]])
             output_path.write_text("keep me", encoding="utf-8")
 
-            with self.assertRaisesRegex(DialogueCsvError, "new.csv:1"):
+            error_type = require_feature("DialogueCsvError")
+            with self.assertRaisesRegex(error_type, "new.csv:1"):
                 extract_updated_dialogues(old_path, new_path, output_path)
 
             self.assertEqual("keep me", output_path.read_text(encoding="utf-8"))
@@ -230,7 +240,7 @@ class CsvExtractionTests(unittest.TestCase):
 
 - [ ] **Step 2: Run the tests and verify RED**
 
-Run the unittest discovery command. Expected: import failure for the undefined `DialogueCsvError` and `extract_updated_dialogues` names.
+Run the unittest discovery command. Expected: the four Task 1 tests pass and the three new tests fail with assertions naming the missing `extract_updated_dialogues` or `DialogueCsvError` feature; there must be no import error.
 
 - [ ] **Step 3: Implement validated CSV reading and writing**
 
@@ -316,12 +326,8 @@ git commit -m "feat(scripts): write validated dialogue update CSV"
 Extend imports and add:
 
 ```python
-from scripts.extract_updated_dialogues import (
-    DialogueCsvError,
-    build_output_path,
-    extract_updated_dialogues,
-    select_updated_dialogues,
-)
+def build_output_path(*args):
+    return require_feature("build_output_path")(*args)
 
 
 class BuildOutputPathTests(unittest.TestCase):
@@ -346,7 +352,7 @@ class BuildOutputPathTests(unittest.TestCase):
 
 - [ ] **Step 2: Run the tests and verify RED**
 
-Run the unittest discovery command. Expected: import failure for the undefined `build_output_path` name.
+Run the unittest discovery command. Expected: the seven existing tests pass and the three new tests fail with assertions containing `缺少待实现功能: build_output_path`; there must be no import error.
 
 - [ ] **Step 3: Add constants, build-ID validation, and the command entry point**
 
@@ -430,7 +436,7 @@ with tempfile.TemporaryDirectory() as temp_dir:
     assert len(rows) == 11, len(rows)
     assert all(len(row) == 3 and row[2] == "" for row in rows)
     print(stats)
-'@ | python -
+'@ | py -
 ```
 
 Expected: `ExtractionStats(old_rows=2261, new_rows=6385, unmatched_occurrences=50, unique_rows=11)` and exit code 0.
@@ -438,7 +444,7 @@ Expected: `ExtractionStats(old_rows=2261, new_rows=6385, unmatched_occurrences=5
 - [ ] **Step 6: Run repository hygiene checks**
 
 ```powershell
-python -m py_compile scripts/extract_updated_dialogues.py tests/test_extract_updated_dialogues.py
+py -m py_compile scripts/extract_updated_dialogues.py tests/test_extract_updated_dialogues.py
 git diff --check
 git status --short
 ```
