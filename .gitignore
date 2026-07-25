@@ -35,3 +35,6 @@ __pycache__/
 
 # Claude
 .claude/
+
+# Local Git worktrees
+.worktrees/
