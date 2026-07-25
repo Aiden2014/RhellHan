@@ -82,14 +82,45 @@ public static class TranslationManager
             "dialogue_filtered.csv",
             4
         );
+        // key: TranslationKey[0] + "|||" + TranslationKey[1]. value: [TranslationOriginalText list, TranslationTranslatedText list]
+        var dialogueBundleMap = new Dictionary<string, List<List<string>>>();
+        foreach (var dialogueTranslationRow in dialogueTranslationsRows)
+        {
+            var dialogueKey =
+                dialogueTranslationRow.TranslationKey[0]
+                + "|||"
+                + dialogueTranslationRow.TranslationKey[1];
+            if (!dialogueBundleMap.ContainsKey(dialogueKey))
+            {
+                dialogueBundleMap[dialogueKey] = new List<List<string>>();
+            }
+            dialogueBundleMap[dialogueKey]
+                .Add([
+                    dialogueTranslationRow.TranslationOriginalText,
+                    dialogueTranslationRow.TranslationTranslatedText,
+                ]);
+        }
+
         var dialogue24107474TranslationsRows = ResourceLoader.GetTranslationRows(
             "dialogue_filtered_24107474.csv",
             4
         );
-        // key: TranslationKey[0] + "|||" + TranslationKey[1]. value: [TranslationOriginalText list, TranslationTranslatedText list]
-        var dialogueBundleMap = new Dictionary<string, List<List<string>>>();
-        InsertIntoBundleMap(ref dialogueBundleMap, dialogueTranslationsRows);
-        InsertIntoBundleMap(ref dialogueBundleMap, dialogue24107474TranslationsRows);
+        foreach (var dialogueTranslationRow in dialogue24107474TranslationsRows)
+        {
+            var dialogueKey =
+                dialogueTranslationRow.TranslationKey[0]
+                + "|||"
+                + dialogueTranslationRow.TranslationKey[1];
+            if (!dialogueBundleMap.ContainsKey(dialogueKey))
+            {
+                dialogueBundleMap[dialogueKey] = new List<List<string>>();
+            }
+            dialogueBundleMap[dialogueKey][int.Parse(dialogueTranslationRow.TranslationKey[2])] =
+            [
+                dialogueTranslationRow.TranslationOriginalText,
+                dialogueTranslationRow.TranslationTranslatedText,
+            ];
+        }
 
         // add space dialogue translations
         var spaceDialogueTranslationsRows = ResourceLoader.GetTranslationRows(
@@ -108,10 +139,19 @@ public static class TranslationManager
             }
 
             dialogueBundleMap[dialogueKey]
-                .Add([
-                    dialogueTranslationRow.TranslationOriginalText,
-                    dialogueTranslationRow.TranslationTranslatedText,
-                ]);
+                .Insert(
+                    int.Parse(dialogueTranslationRow.TranslationKey[2]),
+                    [
+                        dialogueTranslationRow.TranslationOriginalText,
+                        dialogueTranslationRow.TranslationTranslatedText,
+                    ]
+                );
+            foreach (var translationList in dialogueBundleMap[dialogueKey])
+            {
+                Plugin.Logger.LogInfo(
+                    $"Dialogue space: {dialogueKey} - {translationList[0]} -> {translationList[1]}"
+                );
+            }
         }
 
         // Build base DialogueTranslations entries
@@ -187,29 +227,6 @@ public static class TranslationManager
                 var value = combo.Select(x => x.chinese).ToList();
                 DialogueTranslations[key] = value;
             }
-        }
-    }
-
-    private static void InsertIntoBundleMap(
-        ref Dictionary<string, List<List<string>>> bundleMap,
-        IEnumerable<TranslationRow> rows
-    )
-    {
-        foreach (var dialogueTranslationRow in rows)
-        {
-            var dialogueKey =
-                dialogueTranslationRow.TranslationKey[0]
-                + "|||"
-                + dialogueTranslationRow.TranslationKey[1];
-            if (!bundleMap.ContainsKey(dialogueKey))
-            {
-                bundleMap[dialogueKey] = new List<List<string>>();
-            }
-            bundleMap[dialogueKey]
-                .Add([
-                    dialogueTranslationRow.TranslationOriginalText,
-                    dialogueTranslationRow.TranslationTranslatedText,
-                ]);
         }
     }
 
