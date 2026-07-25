@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 
 # 路径配置
-MONOBEHAVIOUR_FOLDER = r'D:\SteamLibrary\steamapps\common\monobehaviour'
+MONOBEHAVIOUR_FOLDER = r'D:\SteamLibrary\steamapps\common\monobehaviour\v3'
 RESOURCES_FOLDER = r'D:\projects\RhellHan\resources'
 OUTPUT_CSV = os.path.join(RESOURCES_FOLDER, 'dialogue.csv')
 

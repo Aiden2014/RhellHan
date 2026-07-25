@@ -82,36 +82,14 @@ public static class TranslationManager
             "dialogue_filtered.csv",
             4
         );
+        var dialogue24107474TranslationsRows = ResourceLoader.GetTranslationRows(
+            "dialogue_filtered_24107474.csv",
+            4
+        );
         // key: TranslationKey[0] + "|||" + TranslationKey[1]. value: [TranslationOriginalText list, TranslationTranslatedText list]
         var dialogueBundleMap = new Dictionary<string, List<List<string>>>();
-        foreach (var dialogueTranslationRow in dialogueTranslationsRows)
-        {
-            var dialogueKey =
-                dialogueTranslationRow.TranslationKey[0]
-                + "|||"
-                + dialogueTranslationRow.TranslationKey[1];
-            if (!dialogueBundleMap.ContainsKey(dialogueKey))
-            {
-                dialogueBundleMap[dialogueKey] = new List<List<string>>();
-            }
-
-            // update dialogue original text
-            if (
-                "eavensent being i stand watching from what must have been your calling land.".Equals(
-                    dialogueTranslationRow.TranslationOriginalText
-                )
-            )
-            {
-                dialogueTranslationRow.TranslationOriginalText =
-                    "heavensent being i stand watching from what must have been your calling land.";
-            }
-
-            dialogueBundleMap[dialogueKey]
-                .Add([
-                    dialogueTranslationRow.TranslationOriginalText,
-                    dialogueTranslationRow.TranslationTranslatedText,
-                ]);
-        }
+        InsertIntoBundleMap(ref dialogueBundleMap, dialogueTranslationsRows);
+        InsertIntoBundleMap(ref dialogueBundleMap, dialogue24107474TranslationsRows);
 
         // add space dialogue translations
         var spaceDialogueTranslationsRows = ResourceLoader.GetTranslationRows(
@@ -209,6 +187,29 @@ public static class TranslationManager
                 var value = combo.Select(x => x.chinese).ToList();
                 DialogueTranslations[key] = value;
             }
+        }
+    }
+
+    private static void InsertIntoBundleMap(
+        ref Dictionary<string, List<List<string>>> bundleMap,
+        IEnumerable<TranslationRow> rows
+    )
+    {
+        foreach (var dialogueTranslationRow in rows)
+        {
+            var dialogueKey =
+                dialogueTranslationRow.TranslationKey[0]
+                + "|||"
+                + dialogueTranslationRow.TranslationKey[1];
+            if (!bundleMap.ContainsKey(dialogueKey))
+            {
+                bundleMap[dialogueKey] = new List<List<string>>();
+            }
+            bundleMap[dialogueKey]
+                .Add([
+                    dialogueTranslationRow.TranslationOriginalText,
+                    dialogueTranslationRow.TranslationTranslatedText,
+                ]);
         }
     }
 
