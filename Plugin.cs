@@ -11,9 +11,77 @@ using HarmonyLib;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace RhellHan;
+
+[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+public class Plugin : BaseUnityPlugin
+{
+    internal static new ManualLogSource Logger;
+
+    public static ConfigEntry<int> _targetFps;
+
+    private void Awake()
+    {
+        // Plugin startup logic
+        Logger = base.Logger;
+        TranslationManager.Init();
+        _targetFps = Config.Bind("Graphics", "TargetFPS", -1, "target frame rate limit");
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = _targetFps.Value;
+        Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
+        Harmony.CreateAndPatchAll(typeof(Hooks));
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        ScanAndReplace();
+    }
+    private void ScanAndReplace()
+    {
+        // 查找内存中所有的 Texture2D
+        Texture2D[] allTextures = Resources.FindObjectsOfTypeAll<Texture2D>();
+        foreach (var tex in allTextures)
+        {
+            Plugin.Logger.LogInfo($"[场景补丁] 扫描到纹理: {tex.name}");
+            ReplaceTexture(tex);
+        }
+    }
+
+    private void ReplaceTexture(Texture2D target)
+    {
+        if (target == null)
+            return;
+        string[] targetNames = { "MainMenu_Logo", "MainMenu_Press_English" };
+        bool isTarget = targetNames.Any(n =>
+            target.name.Equals(n, StringComparison.OrdinalIgnoreCase)
+        );
+        if (isTarget)
+        {
+            try
+            {
+                byte[] data = ResourceLoader.LoadImage(target.name + ".png");
+                if (data == null || data.Length == 0)
+                    return;
+
+                if (!target.LoadImage(data))
+                {
+                    Logger.LogError($"[场景补丁] 图片解码失败: {target.name}.png");
+                    return;
+                }
+
+                Logger.LogInfo($"[场景补丁] 成功替换: {target.name}");
+            }
+            catch (Exception e)
+            {
+                Logger.LogError($"替换出错: {e.Message}");
+            }
+        }
+    }
+}
 
 public class FallbackFontThicknessFixer : MonoBehaviour
 {
@@ -241,26 +309,6 @@ public class FallbackFontThicknessFixer : MonoBehaviour
     private static Vector2 Wobble(float time, float intensity)
     {
         return new Vector2(Mathf.Sin(time * 3.3f * intensity), Mathf.Cos(time * 2f * intensity));
-    }
-}
-
-[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-public class Plugin : BaseUnityPlugin
-{
-    internal static new ManualLogSource Logger;
-
-    public static ConfigEntry<int> _targetFps;
-
-    private void Awake()
-    {
-        // Plugin startup logic
-        Logger = base.Logger;
-        TranslationManager.Init();
-        _targetFps = Config.Bind("Graphics", "TargetFPS", -1, "target frame rate limit");
-        QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = _targetFps.Value;
-        Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
-        Harmony.CreateAndPatchAll(typeof(Hooks));
     }
 }
 

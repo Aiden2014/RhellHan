@@ -157,6 +157,20 @@ public static class ResourceLoader
         }
     }
 
+    public static byte[] LoadImage(string photoName)
+    {
+        // 获取插件 DLL 所在目录下的 resources 文件夹
+        string pluginDir = Path.GetDirectoryName(typeof(ResourceLoader).Assembly.Location);
+        string path = Path.Combine(pluginDir, translationFilePath, photoName);
+
+        if (File.Exists(path))
+        {
+            return File.ReadAllBytes(path);
+        }
+        Plugin.Logger.LogError("[LoadImage] Unable to load image: " + photoName);
+        return null;
+    }
+
     private static List<List<string>> ParseCsvRows(string text)
     {
         var rows = new List<List<string>>();
