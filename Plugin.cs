@@ -40,44 +40,42 @@ public class Plugin : BaseUnityPlugin
     {
         ScanAndReplace();
     }
+
     private void ScanAndReplace()
     {
         // 查找内存中所有的 Texture2D
-        Texture2D[] allTextures = Resources.FindObjectsOfTypeAll<Texture2D>();
-        foreach (var tex in allTextures)
+        foreach (var target in Resources.FindObjectsOfTypeAll<Texture2D>())
         {
-            Plugin.Logger.LogInfo($"[场景补丁] 扫描到纹理: {tex.name}");
-            ReplaceTexture(tex);
-        }
-    }
-
-    private void ReplaceTexture(Texture2D target)
-    {
-        if (target == null)
-            return;
-        string[] targetNames = { "MainMenu_Logo", "MainMenu_Press_English" };
-        bool isTarget = targetNames.Any(n =>
-            target.name.Equals(n, StringComparison.OrdinalIgnoreCase)
-        );
-        if (isTarget)
-        {
-            try
+            if (target == null)
             {
-                byte[] data = ResourceLoader.LoadImage(target.name + ".png");
-                if (data == null || data.Length == 0)
-                    return;
-
-                if (!target.LoadImage(data))
-                {
-                    Logger.LogError($"[场景补丁] 图片解码失败: {target.name}.png");
-                    return;
-                }
-
-                Logger.LogInfo($"[场景补丁] 成功替换: {target.name}");
+                continue;
             }
-            catch (Exception e)
+            string[] targetNames = ["MainMenu_Logo", "MainMenu_Press_English"];
+            bool isTarget = targetNames.Any(n =>
+                target.name.Equals(n, StringComparison.OrdinalIgnoreCase)
+            );
+            if (isTarget)
             {
-                Logger.LogError($"替换出错: {e.Message}");
+                try
+                {
+                    byte[] data = ResourceLoader.LoadImage(target.name + ".png");
+                    if (data == null || data.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    if (!target.LoadImage(data))
+                    {
+                        Logger.LogError($"[Scene] 图片解码失败: {target.name}.png");
+                        continue;
+                    }
+
+                    Logger.LogInfo($"[Scene] 成功替换: {target.name}");
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError($"[Scene] 替换出错: {e.Message}");
+                }
             }
         }
     }
@@ -137,7 +135,9 @@ public class FallbackFontThicknessFixer : MonoBehaviour
     private void Update()
     {
         if (_tmpText == null)
+        {
             return;
+        }
 
         DisableDefaultDialogueBold(_tmpText);
 
@@ -170,7 +170,9 @@ public class FallbackFontThicknessFixer : MonoBehaviour
 
         bool needsMeshUpdate = ShouldWobble || HasBoldText;
         if (!needsMeshUpdate || _tmpText.textInfo == null)
+        {
             return;
+        }
 
         _tmpText.ForceMeshUpdate(false, false);
         var textInfo = _tmpText.textInfo;
@@ -184,19 +186,27 @@ public class FallbackFontThicknessFixer : MonoBehaviour
         {
             var charInfo = textInfo.characterInfo[i];
             if (!charInfo.isVisible)
+            {
                 continue;
+            }
 
             if (IsDialogueControlMarkerChar(_tmpText.text, charInfo.index))
+            {
                 continue;
+            }
 
             int matIdx = charInfo.materialReferenceIndex;
             if (matIdx < 0 || matIdx >= textInfo.meshInfo.Length)
+            {
                 continue;
+            }
 
             var mi = textInfo.meshInfo[matIdx];
             int vIdx = charInfo.vertexIndex;
             if (vIdx < 0 || vIdx + 3 >= mi.vertices.Length)
+            {
                 continue;
+            }
 
             // Wobble 效果
             if (ShouldWobble)
@@ -256,7 +266,9 @@ public class FallbackFontThicknessFixer : MonoBehaviour
         for (int i = 0; i < _boldRanges.Count; i++)
         {
             if (_boldRanges[i].Contains(visibleCharacterIndex))
+            {
                 return true;
+            }
         }
         return false;
     }
@@ -264,7 +276,9 @@ public class FallbackFontThicknessFixer : MonoBehaviour
     public static void DisableDefaultDialogueBold(TMP_Text tmpText)
     {
         if (tmpText == null)
+        {
             return;
+        }
 
         if ((tmpText.fontStyle & FontStyles.Bold) == FontStyles.Bold)
         {
@@ -275,11 +289,15 @@ public class FallbackFontThicknessFixer : MonoBehaviour
     private static bool IsDialogueControlMarkerChar(string text, int index)
     {
         if (string.IsNullOrEmpty(text) || index < 0 || index >= text.Length)
+        {
             return false;
+        }
 
         int start = text.LastIndexOf("[[[", index, StringComparison.Ordinal);
         if (start < 0 || !TryGetDialogueControlMarkerEnd(text, start, out var end))
+        {
             return false;
+        }
 
         return index < end;
     }
@@ -288,12 +306,16 @@ public class FallbackFontThicknessFixer : MonoBehaviour
     {
         end = index;
         if (!StartsWith(text, index, "[[["))
+        {
             return false;
+        }
 
         var closeMarker = StartsWith(text, index, "[[[[") ? "]]]]" : "]]]";
         int close = text.IndexOf(closeMarker, index, StringComparison.Ordinal);
         if (close < index)
+        {
             return false;
+        }
 
         end = close + closeMarker.Length;
         return true;
@@ -499,7 +521,9 @@ public static class Hooks
     )
     {
         if (dialogueUi?.dialogueBox == null)
+        {
             return null;
+        }
 
         FallbackFontThicknessFixer.DisableDefaultDialogueBold(dialogueUi.dialogueBox);
 
@@ -519,7 +543,9 @@ public static class Hooks
     {
         var fixer = __instance.dialogueBox.gameObject.GetComponent<FallbackFontThicknessFixer>();
         if (fixer == null)
+        {
             return;
+        }
 
         bool shouldWobble =
             _dialogueVisualStates.TryGetValue(segments, out var visualState)
@@ -541,7 +567,9 @@ public static class Hooks
 
         var fixer = __instance.dialogueBox.gameObject.GetComponent<FallbackFontThicknessFixer>();
         if (fixer == null)
+        {
             return;
+        }
 
         var currentDialogue = Traverse
             .Create(__instance)
@@ -584,7 +612,7 @@ public static class Hooks
         int visibleIndex = 0;
         bool changed = false;
 
-        for (int i = 0; i < text.Length; )
+        for (int i = 0; i < text.Length;)
         {
             if (StartsWith(text, i, "<b>"))
             {
@@ -653,10 +681,14 @@ public static class Hooks
     {
         nextIndex = index;
         if (!StartsWith(text, index, "[[["))
+        {
             return false;
+        }
 
         if (!TryGetDialogueControlMarkerEnd(text, index, out nextIndex))
+        {
             return false;
+        }
 
         builder.Append(text, index, nextIndex - index);
         return true;
@@ -666,12 +698,16 @@ public static class Hooks
     {
         end = index;
         if (!StartsWith(text, index, "[[["))
+        {
             return false;
+        }
 
         var closeMarker = StartsWith(text, index, "[[[[") ? "]]]]" : "]]]";
         int close = text.IndexOf(closeMarker, index, StringComparison.Ordinal);
         if (close < index)
+        {
             return false;
+        }
 
         end = close + closeMarker.Length;
         return true;
@@ -747,16 +783,22 @@ public static class Hooks
     public static void UiStoryHandle_ActivateStoryPoint_Prefix(UiStoryHandle __instance)
     {
         if (__instance.summaries.Any(s => s.storyTxt.Any(c => isChineseChar(c))))
+        {
             return;
+        }
 
         var summaryKey = string.Join("|||", __instance.summaries.Select(s => s.storyTxt));
         if (string.IsNullOrEmpty(summaryKey))
+        {
             return;
+        }
 
         if (TranslationManager.SummaryTranslations.TryGetValue(summaryKey, out var translatedList))
         {
             for (int i = 0; i < __instance.summaries.Count && i < translatedList.Count; i++)
+            {
                 __instance.summaries[i].storyTxt = translatedList[i];
+            }
         }
     }
 
@@ -995,13 +1037,21 @@ public static class Hooks
         foreach (var option in __instance.allOptions)
         {
             if (option?.text == null)
+            {
                 continue;
+            }
+
             var txt = option.text.text;
             if (!hasCjk && txt.Any(c => isChineseChar(c)))
+            {
                 hasCjk = true;
+            }
+
             float width = option.text.GetPreferredValues(txt).x;
             if (width > maxWidth)
+            {
                 maxWidth = width;
+            }
         }
         float cap = hasCjk ? 550f : 485f;
         if (maxWidth > cap)
@@ -1043,7 +1093,9 @@ public static class Hooks
     {
         var text = __instance.StoryText?.text;
         if (string.IsNullOrEmpty(text) || text.Any(c => isChineseChar(c)))
+        {
             return;
+        }
 
         var trimmed = text.Trim();
         if (TranslationManager.StoryPointTranslations.TryGetValue(trimmed, out var translated))
@@ -1087,10 +1139,16 @@ public static class Hooks
     private static void PatchWorldAreaNames(WorldNames worldNames)
     {
         if (worldNames?.worldAreaNames == null || !_patchedWorldNames.Add(worldNames))
+        {
             return;
+        }
+
         var translations = TranslationManager.WorldNameTranslations;
         for (int i = 0; i < worldNames.worldAreaNames.Count && i < translations.Count; i++)
+        {
             worldNames.worldAreaNames[i] = translations[i];
+        }
+
         Plugin.Logger.LogInfo($"Patched {worldNames.worldAreaNames.Count} world area names");
     }
 

@@ -14,7 +14,9 @@ public static class FontManager
     public static bool HasFallback(TMP_FontAsset font, string fallbackName)
     {
         if (font?.fallbackFontAssetTable == null)
+        {
             return false;
+        }
 
         for (int i = 0; i < font.fallbackFontAssetTable.Count; i++)
         {
@@ -31,7 +33,9 @@ public static class FontManager
     public static void SaveFallbackFont(TMP_FontAsset __instance, TMP_FontAsset chineseFallbackFont)
     {
         if (chineseFallbackFont == null)
+        {
             return;
+        }
 
         __instance.fallbackFontAssetTable ??= new System.Collections.Generic.List<TMP_FontAsset>();
 

@@ -57,7 +57,9 @@ public static class ResourceLoader
         // List all asset names for debugging
         var allNames = fontBundle.GetAllAssetNames();
         foreach (var n in allNames)
+        {
             Plugin.Logger.LogInfo($"  Bundle contains asset: {n}");
+        }
 
         var loaded =
             fontBundle.LoadAsset(fontAssetName, typeof(TMP_FontAsset))
@@ -111,7 +113,9 @@ public static class ResourceLoader
         // List all asset names for debugging
         var allNames = fontBundle.GetAllAssetNames();
         foreach (var n in allNames)
+        {
             Plugin.Logger.LogInfo($"  Bundle contains asset: {n}");
+        }
 
         var loaded = fontBundle.LoadAsset(fontAssetName, typeof(Font));
         var chineseFont = loaded as Font;
@@ -137,16 +141,23 @@ public static class ResourceLoader
         foreach (var values in rows)
         {
             if (values.Count == 2)
+            {
                 values.Add(values[1]);
+            }
+
             if (values.Count < 3)
+            {
                 continue;
+            }
 
             var keysText = values[0];
             var keys = string.IsNullOrEmpty(keysText)
                 ? new List<string>()
                 : new List<string>(keysText.Split(new[] { "|||" }, StringSplitOptions.None));
             if (keys.Count < expectedKeyCount)
+            {
                 continue;
+            }
 
             yield return new TranslationRow
             {
@@ -201,7 +212,10 @@ public static class ResourceLoader
             else if ((ch == '\r' || ch == '\n') && !inQuotes)
             {
                 if (ch == '\r' && i + 1 < text.Length && text[i + 1] == '\n')
+                {
                     i++;
+                }
+
                 if (currentRow.Count > 0 || currentField.Length > 0)
                 {
                     currentRow.Add(currentField);

@@ -92,7 +92,7 @@ public static class TranslationManager
                 + dialogueTranslationRow.TranslationKey[1];
             if (!dialogueBundleMap.ContainsKey(dialogueKey))
             {
-                dialogueBundleMap[dialogueKey] = new List<List<string>>();
+                dialogueBundleMap[dialogueKey] = [];
             }
             dialogueBundleMap[dialogueKey]
                 .Add([
@@ -114,7 +114,7 @@ public static class TranslationManager
                 + dialogueTranslationRow.TranslationKey[1];
             if (!dialogueBundleMap.ContainsKey(dialogueKey))
             {
-                dialogueBundleMap[dialogueKey] = new List<List<string>>();
+                dialogueBundleMap[dialogueKey] = [];
             }
 
             dialogueBundleMap[dialogueKey]
@@ -178,16 +178,24 @@ public static class TranslationManager
             var newChinese = row.TranslationTranslatedText;
 
             if (!changerMap.ContainsKey(bundleKey))
-                changerMap[bundleKey] = new Dictionary<int, List<(string, string)>>();
+            {
+                changerMap[bundleKey] = [];
+            }
+
             if (!changerMap[bundleKey].ContainsKey(changeLine))
-                changerMap[bundleKey][changeLine] = new List<(string, string)>();
+            {
+                changerMap[bundleKey][changeLine] = [];
+            }
+
             changerMap[bundleKey][changeLine].Add((newEnglish, newChinese));
         }
 
         foreach (var dialogueBundle in dialogueBundleMap)
         {
             if (!changerMap.TryGetValue(dialogueBundle.Key, out var bundleChangers))
+            {
                 continue;
+            }
 
             var baseTexts = dialogueBundle.Value.Select(v => v[0]).ToList();
             var baseTranslations = dialogueBundle.Value.Select(v => v[1]).ToList();
@@ -199,7 +207,9 @@ public static class TranslationManager
             {
                 optionsPerIndex[i] = [(baseTexts[i], baseTranslations[i])];
                 if (bundleChangers.TryGetValue(i, out var changers))
+                {
                     optionsPerIndex[i].AddRange(changers);
+                }
             }
 
             // Generate all combinations via iterative Cartesian product.
@@ -240,7 +250,7 @@ public static class TranslationManager
             var summaryKey = summaryTranslationRow.TranslationKey[0];
             if (!summaryBundleMap.ContainsKey(summaryKey))
             {
-                summaryBundleMap[summaryKey] = new List<List<string>>();
+                summaryBundleMap[summaryKey] = [];
             }
 
             summaryBundleMap[summaryKey]
@@ -422,7 +432,7 @@ public static class TranslationManager
                 + dialogueOptionTranslationRow.TranslationKey[1];
             if (!dialogueOptionBundleMap.ContainsKey(dialogueOptionKey))
             {
-                dialogueOptionBundleMap[dialogueOptionKey] = new List<List<string>>();
+                dialogueOptionBundleMap[dialogueOptionKey] = [];
             }
 
             dialogueOptionBundleMap[dialogueOptionKey]
@@ -479,7 +489,10 @@ public static class TranslationManager
         {
             total++;
             if (row.TranslationOriginalText != row.TranslationTranslatedText)
+            {
                 hasChinese++;
+            }
+
             StoryPointTranslations[row.TranslationOriginalText.Trim()] =
                 row.TranslationTranslatedText;
         }
@@ -493,12 +506,18 @@ public static class TranslationManager
             .OrderBy(x =>
             {
                 if (int.TryParse(x.TranslationKey[0], out int result))
+                {
                     return result;
+                }
+
                 return int.MaxValue;
             })
             .ToList();
         foreach (var row in rows)
+        {
             WorldNameTranslations.Add(row.TranslationTranslatedText);
+        }
+
         Plugin.Logger.LogInfo($"InitWorldName: {WorldNameTranslations.Count} entries");
     }
 
@@ -565,8 +584,7 @@ public static class TranslationManager
         foreach (var row in ResourceLoader.GetTranslationRows("text_mesh_pro_ugui.csv", 1))
         {
             var key = NormalizeNewlines(row.TranslationOriginalText);
-            var value = NormalizeNewlines(row.TranslationTranslatedText);
-            TextMeshProUGUITranslations[key] = value;
+            TextMeshProUGUITranslations[key] = NormalizeNewlines(row.TranslationTranslatedText);
         }
     }
 

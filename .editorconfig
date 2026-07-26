@@ -18,6 +18,9 @@ dotnet_diagnostic.RCS1213.severity = none
 # Harmony 通过参数名注入，分析器不识别
 dotnet_diagnostic.IDE0060.severity = none
 dotnet_diagnostic.RCS1163.severity = none
+# --- C# 代码风格，把单行 if 包进 {} ---
+csharp_prefer_braces = true:suggestion
+dotnet_diagnostic.IDE0011.severity = warning
 
 # --- 常用规则微调 ---
 # RCS1001: 添加花括号 (建议加上)
