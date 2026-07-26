@@ -101,27 +101,6 @@ public static class TranslationManager
                 ]);
         }
 
-        var dialogue24107474TranslationsRows = ResourceLoader.GetTranslationRows(
-            "dialogue_filtered_24107474.csv",
-            4
-        );
-        foreach (var dialogueTranslationRow in dialogue24107474TranslationsRows)
-        {
-            var dialogueKey =
-                dialogueTranslationRow.TranslationKey[0]
-                + "|||"
-                + dialogueTranslationRow.TranslationKey[1];
-            if (!dialogueBundleMap.ContainsKey(dialogueKey))
-            {
-                dialogueBundleMap[dialogueKey] = new List<List<string>>();
-            }
-            dialogueBundleMap[dialogueKey][int.Parse(dialogueTranslationRow.TranslationKey[2])] =
-            [
-                dialogueTranslationRow.TranslationOriginalText,
-                dialogueTranslationRow.TranslationTranslatedText,
-            ];
-        }
-
         // add space dialogue translations
         var spaceDialogueTranslationsRows = ResourceLoader.GetTranslationRows(
             "dialogue_space.csv",
@@ -152,6 +131,27 @@ public static class TranslationManager
                     $"Dialogue space: {dialogueKey} - {translationList[0]} -> {translationList[1]}"
                 );
             }
+        }
+
+        var dialogue24107474TranslationsRows = ResourceLoader.GetTranslationRows(
+            "dialogue_filtered_24107474.csv",
+            4
+        );
+        foreach (var dialogueTranslationRow in dialogue24107474TranslationsRows)
+        {
+            var dialogueKey =
+                dialogueTranslationRow.TranslationKey[0]
+                + "|||"
+                + dialogueTranslationRow.TranslationKey[1];
+            if (!dialogueBundleMap.ContainsKey(dialogueKey))
+            {
+                dialogueBundleMap[dialogueKey] = new List<List<string>>();
+            }
+            dialogueBundleMap[dialogueKey][int.Parse(dialogueTranslationRow.TranslationKey[2])] =
+            [
+                dialogueTranslationRow.TranslationOriginalText,
+                dialogueTranslationRow.TranslationTranslatedText,
+            ];
         }
 
         // Build base DialogueTranslations entries
