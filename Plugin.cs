@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -1094,6 +1094,20 @@ public static class Hooks
         {
             Plugin.Logger.LogWarning($"No translation found for tab description: {text}");
         }
+    }
+
+    [HarmonyPatch(typeof(UiItemsHandle), nameof(UiItemsHandle.UpdateDescription))]
+    [HarmonyPostfix]
+    public static void UiItemsHandle_UpdateDescription_Postfix(UiItemsHandle __instance)
+    {
+        var text = __instance.itemDescription?.text;
+        if (string.IsNullOrEmpty(text) || !text.Any(c => isChineseChar(c)))
+        {
+            return;
+        }
+
+        __instance.itemDescription.text =
+            TextLayoutPolicy.PrepareInventoryMenuDescription(text);
     }
 
     [HarmonyPatch(typeof(UiStoryCtrl), nameof(UiStoryCtrl.UpdateVisuals))]

@@ -27,6 +27,52 @@ internal static class Program
         );
 
         Run(
+            "inventory menu wraps after twenty-five Chinese characters",
+            () =>
+            {
+                Equal(
+                    "甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌亥天地人\n和",
+                    TextLayoutPolicy.PrepareInventoryMenuDescription(
+                        "甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌亥天地人和"
+                    )
+                );
+            }
+        );
+
+        Run(
+            "inventory menu preserves authored newlines",
+            () =>
+            {
+                Equal(
+                    "第一行\n第二行",
+                    TextLayoutPolicy.PrepareInventoryMenuDescription("第一行\n第二行")
+                );
+            }
+        );
+
+        Run(
+            "inventory menu leaves short Chinese unchanged",
+            () =>
+            {
+                Equal(
+                    "简短中文",
+                    TextLayoutPolicy.PrepareInventoryMenuDescription("简短中文")
+                );
+            }
+        );
+
+        Run(
+            "inventory menu leaves short English unchanged",
+            () =>
+            {
+                Equal(
+                    "short English",
+                    TextLayoutPolicy.PrepareInventoryMenuDescription("short English")
+                );
+            }
+        );
+
+        Run(
             "automatic Chinese dialogue can use the normal maximum",
             () =>
             {

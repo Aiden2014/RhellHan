@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace RhellHan;
 
@@ -357,7 +356,7 @@ public static class TranslationManager
         foreach (var row in mapLocationHighlightRows)
         {
             var key = row.TranslationKey[0];
-            var value = InsertManualBreaks(row.TranslationTranslatedText, 54);
+            var value = TextLayoutPolicy.InsertManualBreaks(row.TranslationTranslatedText, 54);
             MapLocationHightlightTranslations[key] = value;
         }
     }
@@ -464,7 +463,7 @@ public static class TranslationManager
         var rows = ResourceLoader.GetTranslationRows("item_tab_description.csv", 1);
         foreach (var row in rows)
         {
-            TabDescriptionTranslations[row.TranslationOriginalText] = InsertManualBreaks(
+            TabDescriptionTranslations[row.TranslationOriginalText] = TextLayoutPolicy.InsertManualBreaks(
                 row.TranslationTranslatedText,
                 50
             );
@@ -539,7 +538,7 @@ public static class TranslationManager
         }
         foreach (var row in ResourceLoader.GetTranslationRows("cheat_description.csv", 1))
         {
-            CheatDescriptionTranslations[row.TranslationOriginalText] = InsertManualBreaks(
+            CheatDescriptionTranslations[row.TranslationOriginalText] = TextLayoutPolicy.InsertManualBreaks(
                 row.TranslationTranslatedText,
                 28
             );
@@ -567,7 +566,7 @@ public static class TranslationManager
         )
         {
             SelectableSpellDescriptionTranslations[row.TranslationOriginalText] =
-                InsertManualBreaks(row.TranslationTranslatedText, 10);
+                TextLayoutPolicy.InsertManualBreaks(row.TranslationTranslatedText, 10);
         }
     }
 
@@ -615,90 +614,4 @@ public static class TranslationManager
         RanzomierMenuTranslations["all areas"] = "所有区域";
     }
 
-    private static string InsertManualBreaks(string text, int maxWidth)
-    {
-        StringBuilder sb = new();
-        float currentX = 0;
-        int newLineIndex = -1;
-        bool inTag = false;
-
-        for (int i = 0; i < text.Length; i++)
-        {
-            char c = text[i];
-
-            if (c == '\n' || c == '\r')
-            {
-                currentX = 0;
-                newLineIndex = -1;
-                inTag = false;
-                sb.Append(c);
-                continue;
-            }
-
-            if (
-                c == '<'
-                && i + 1 < text.Length
-                && (char.IsLetter(text[i + 1]) || text[i + 1] == '/')
-            )
-            {
-                inTag = true;
-                sb.Append(c);
-                continue;
-            }
-
-            if (inTag && c == '>')
-            {
-                inTag = false;
-                sb.Append(c);
-                int len = sb.Length;
-                if (len >= 4 && sb[len - 4] == '<' && sb[len - 3] == 'b' && sb[len - 2] == 'r')
-                {
-                    currentX = 0;
-                    newLineIndex = -1;
-                }
-                continue;
-            }
-
-            if (inTag)
-            {
-                sb.Append(c);
-                continue;
-            }
-
-            if (!(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z') && !(c >= '0' && c <= '9'))
-            {
-                newLineIndex = i;
-            }
-
-            if (c == '[' || c == ']')
-            {
-                sb.Append(c);
-                continue;
-            }
-
-            // ASCII characters are 1 unit wide, non-ASCII characters are 2 units wide
-            int charW = c >= 0 && c <= 127 ? 1 : 2;
-
-            if (currentX > 0 && currentX + charW > maxWidth)
-            {
-                currentX = 0;
-                if (newLineIndex != -1)
-                {
-                    int charsToRemove = i - newLineIndex;
-                    sb.Length -= charsToRemove;
-                    sb.Append('\n');
-                    i = newLineIndex - 1;
-                    newLineIndex = -1;
-                    continue;
-                }
-                sb.Append('\n');
-                newLineIndex = -1;
-            }
-
-            sb.Append(c);
-            currentX += charW;
-        }
-
-        return sb.ToString();
-    }
 }
