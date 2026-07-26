@@ -565,18 +565,27 @@ public static class Hooks
     {
         FallbackFontThicknessFixer.DisableDefaultDialogueBold(__instance.dialogueBox);
 
-        var fixer = __instance.dialogueBox.gameObject.GetComponent<FallbackFontThicknessFixer>();
-        if (fixer == null)
-        {
-            return;
-        }
-
         var currentDialogue = Traverse
             .Create(__instance)
             .Field("currentDialogue")
             .GetValue<List<DialogueSegment>>();
+
+        if (currentDialogue != null && dex >= 0 && dex < currentDialogue.Count)
+        {
+            var segment = currentDialogue[dex];
+            __instance.dialogueBox.fontSizeMax = TextLayoutPolicy.GetDialogueFontSizeMax(
+                segment.dialogue,
+                segment.FontSize,
+                __instance.dialogueBox.fontSizeMax
+            );
+        }
+
+        var fixer = __instance.dialogueBox.gameObject.GetComponent<FallbackFontThicknessFixer>();
         if (
-            currentDialogue == null
+            fixer == null
+            || currentDialogue == null
+            || dex < 0
+            || dex >= currentDialogue.Count
             || !_dialogueVisualStates.TryGetValue(currentDialogue, out var visualState)
         )
         {

@@ -388,7 +388,7 @@ public static class TranslationManager
             .ToList();
         foreach (var row in descriptionRows)
         {
-            var value = InsertManualBreaks(row.TranslationTranslatedText, 50);
+            var value = TextLayoutPolicy.PrepareDescription(row.TranslationTranslatedText);
             translationList.Add(value);
         }
     }
