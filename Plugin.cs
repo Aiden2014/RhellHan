@@ -772,6 +772,7 @@ public static class Hooks
             TranslationManager.ItemDescriptionTranslations,
             (item, desc) => item.Description = desc
         );
+        __instance.brokenItemText = "...但它在你手里就碎了。";
     }
 
     [HarmonyPatch(typeof(UISelectableSpell), nameof(UISelectableSpell.GetDescription))]
